@@ -1,0 +1,29 @@
+#!/bin/bash
+
+GRAPHITE=<Graphite server name>
+PORT=2003
+HOSTNAME=`hostname | cut -d. -f1`
+
+Month=`date +%b`
+Day=`date +%_d`
+
+NumberOfLogins=`cat /var/log/secure | grep -v "session opened for user root" | grep "session opened for user" | grep "$Month $Day" | grep -Ev "backupexec" | wc -l`
+
+if [ $NumberOfLogins = 0 ]
+then
+
+NumberProcess=`top -bmn 1 | grep -cE 'svc\.|stg\.|qa\.'`
+
+NumberOfLogins2=$(( $NumberOfLogins+$NumberProcess ))
+
+echo "Combined logins: $NumberOfLogins2"
+
+echo "$HOSTNAME.logins.count $NumberOfLogins2 `date +%s`" | nc $GRAPHITE $PORT
+
+else
+
+echo "Logins from /var/log/secure: $NumberOfLogins"
+
+echo "$HOSTNAME.logins.count $NumberOfLogins `date +%s`" | nc $GRAPHITE $PORT
+
+fi
