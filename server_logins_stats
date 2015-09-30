@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GRAPHITE=<Graphite server name>
+GRAPHITE={{ salt['pillar.get']('globals:haproxy') }}
 PORT=2003
 HOSTNAME=`hostname | cut -d. -f1`
 
